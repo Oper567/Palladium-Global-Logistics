@@ -6,6 +6,7 @@ import { prisma } from "@/lib/prisma";
 // Import the components we built
 import AdminForm from "@/components/AdminForm";
 import UserTable from "@/components/UserTable";
+import AdminFleetManager from "@/components/AdminFleetManager"; // 🚨 NEW: Import the Fleet Manager
 
 export default async function AdminDashboard() {
   // 1. 🚨 Unbreakable Server-Side Security Gate
@@ -15,11 +16,12 @@ export default async function AdminDashboard() {
   }
 
   // 2. 📊 Parallel Data Fetching for Dashboard Stats
-  // We fetch fleet stats from Supabase and user data from Clerk simultaneously
-  const [totalResources, activeResources, client] = await Promise.all([
+  // 🚨 UPGRADE: Added rawFleetData to the Promise.all array for maximum speed
+  const [totalResources, activeResources, client, rawFleetData] = await Promise.all([
     prisma.resource.count(),
     prisma.resource.count({ where: { status: "Available" } }),
     clerkClient(),
+    prisma.resource.findMany({ orderBy: { createdAt: "desc" } }),
   ]);
 
   // Fetch and format the user list from Clerk
@@ -36,7 +38,7 @@ export default async function AdminDashboard() {
     <div className="min-h-screen bg-slate-50 pb-24">
       
       {/* 🚀 Top Navigation / Branding Bar */}
-      <header className="bg-white border-b border-slate-200 sticky top-0 z-50">
+      <header className="bg-white border-b border-slate-200 sticky top-0 z-50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-20 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <div className="w-10 h-10 bg-brand-primary flex items-center justify-center rounded-sm shadow-md">
@@ -106,8 +108,19 @@ export default async function AdminDashboard() {
             </div>
           </div>
           
-          {/* We reuse the Client Component form we already built! */}
           <AdminForm />
+        </section>
+
+        {/* 🛠️ Fleet Management Section (Inline Editor) */}
+        <section>
+          <div className="mb-6 flex flex-col md:flex-row md:items-end justify-between gap-4 border-b border-slate-200 pb-4">
+            <div>
+              <h2 className="text-2xl font-black text-brand-primary uppercase tracking-tighter">Fleet Directory</h2>
+              <p className="text-[10px] font-bold text-slate-400 uppercase tracking-widest mt-1">Edit pricing, update status, or remove assets entirely</p>
+            </div>
+          </div>
+          
+          <AdminFleetManager fleet={rawFleetData} />
         </section>
 
         {/* 🔐 Access Control Section (UserTable) */}
@@ -119,7 +132,6 @@ export default async function AdminDashboard() {
             </div>
           </div>
           
-          {/* We pass the formatted Clerk users into our Client Component table */}
           <UserTable users={formattedUsers} />
         </section>
 

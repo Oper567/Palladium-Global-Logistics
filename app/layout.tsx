@@ -61,7 +61,8 @@ export default function RootLayout({
         }
       }}
     >
-      <html lang="en" className="scroll-smooth" suppressHydrationWarning>
+      {/* 🚨 FIX: Added data-scroll-behavior="smooth" to clear the Next.js routing warning */}
+      <html lang="en" className="scroll-smooth" data-scroll-behavior="smooth" suppressHydrationWarning>
         <body
           className={`
             ${inter.className} bg-slate-50 text-slate-800 antialiased 

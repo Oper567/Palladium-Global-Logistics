@@ -1,22 +1,18 @@
-/* Next.js recommends next/font/google, but this is perfectly fine for pure CSS */
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap');
-
 /* Tailwind v4 Engine */
 @import "tailwindcss";
 
-/* 🚨 The UploadThing CSS to prevent invisible dropzones! */
+/* The UploadThing CSS to prevent invisible dropzones */
 @import "@uploadthing/react/styles.css";
 
 @theme {
   /* --- Enterprise Logistics Brand Palette --- */
   --color-brand-primary: #002147; /* Deep Corporate Navy (Authority, Security, Global Trust) */
   --color-brand-accent: #eab308;  /* Premium Amber Gold (Speed, Priority Freight, Alertness) */
-  --color-whatsapp: #25D366;      /* Official WhatsApp Green */
-  --color-whatsapp-hover: #128C7E;
   --color-brand-light: #f8fafc;   /* Crisp Slate White for Dashboard legibility */
   
-  --font-sans: "Inter", sans-serif; 
-
+  --color-whatsapp: #25D366;      /* Official WhatsApp Green */
+  --color-whatsapp-hover: #128C7E;
+  
   /* --- Custom Animations --- */
   --animate-slide-up: slide-up 0.6s cubic-bezier(0.16, 1, 0.3, 1) forwards;
   --animate-pulse-slow: pulse 3s cubic-bezier(0.4, 0, 0.6, 1) infinite;
@@ -41,7 +37,7 @@
 
 @layer base {
   html, body {
-    @apply scroll-smooth bg-brand-light text-slate-800 antialiased font-sans;
+    @apply scroll-smooth bg-brand-light text-slate-800 antialiased;
     /* Stabilizes font scaling on mobile */
     -webkit-text-size-adjust: 100%;
     -webkit-font-smoothing: antialiased;
@@ -65,7 +61,19 @@
   }
 
   ::selection {
-    @apply bg-brand-accent text-brand-primary; /* Gold background with Navy text looks incredibly sharp */
+    @apply bg-brand-accent text-brand-primary;
+  }
+
+  /* 🚨 ENTERPRISE UX: Custom Industrial Scrollbar */
+  ::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+  }
+  ::-webkit-scrollbar-track {
+    @apply bg-slate-100 rounded-sm;
+  }
+  ::-webkit-scrollbar-thumb {
+    @apply bg-brand-primary/40 rounded-sm hover:bg-brand-primary transition-colors;
   }
 }
 

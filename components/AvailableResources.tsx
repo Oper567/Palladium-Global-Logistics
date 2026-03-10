@@ -22,6 +22,16 @@ const AvailableResources = async () => {
 
   const whatsappNumber = "2348066605477";
 
+  // Dynamic category icons for the dashboard thumbnails
+  const getCategoryIcon = (category: string) => {
+    switch(category) {
+      case "Light": return "🛵";
+      case "Medium": return "🚐";
+      case "Heavy": return "🚛";
+      default: return "📦";
+    }
+  };
+
   return (
     <section className="py-12 bg-transparent w-full">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -82,7 +92,12 @@ const AvailableResources = async () => {
                 {/* 🟢 Live Data Mapping */}
                 {!fetchError && resources.map((item) => {
                   const isAvailable = item.status === "Available";
-                  const waMessage = `Hello Palladium Logistics, I am interested in booking the ${item.name} (${item.category}) starting at ${item.basePrice}.`;
+                  
+                  // 🚨 DEFENSIVE UX UPGRADE: Ensure old DB entries still show the Naira symbol
+                  const displayPrice = item.basePrice.includes("₦") ? item.basePrice : `₦ ${item.basePrice}`;
+                  
+                  // Use the formatted price in the WhatsApp message
+                  const waMessage = `Hello Palladium Logistics, I am interested in booking the ${item.name} (${item.category}) starting at ${displayPrice}.`;
                   const waLink = `https://wa.me/${whatsappNumber}?text=${encodeURIComponent(waMessage)}`;
 
                   return (
@@ -102,9 +117,9 @@ const AvailableResources = async () => {
                               />
                             </div>
                           ) : (
-                            <div className="w-14 h-14 shrink-0 bg-slate-100 rounded-sm border border-slate-200 flex items-center justify-center">
-                              <span className="text-[9px] text-slate-400 font-black uppercase tracking-widest text-center leading-tight">
-                                No<br />Vis
+                            <div className="w-14 h-14 shrink-0 bg-slate-50 rounded-sm border border-slate-200 flex items-center justify-center group-hover:bg-brand-light transition-colors shadow-inner">
+                              <span className="text-2xl drop-shadow-sm group-hover:scale-110 transition-transform duration-500">
+                                {getCategoryIcon(item.category)}
                               </span>
                             </div>
                           )}
@@ -124,7 +139,8 @@ const AvailableResources = async () => {
                       {/* Column 3: Price */}
                       <td className="p-5">
                         <span className="font-black text-brand-primary text-base md:text-lg tracking-tight">
-                          {item.basePrice}
+                          {/* Render the safely formatted price */}
+                          {displayPrice}
                         </span>
                       </td>
 
@@ -163,7 +179,7 @@ const AvailableResources = async () => {
                         >
                           {isAvailable ? "Initiate Dispatch" : "Offline"}
                           {isAvailable && (
-                            <svg className="w-3 h-3 transform -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
+                            <svg className="w-3 h-3 transform -rotate-45" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d="M14 5l7 7m0 0l-7-7m7-7H3"></path></svg>
                           )}
                         </a>
                       </td>

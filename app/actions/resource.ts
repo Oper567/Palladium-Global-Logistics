@@ -2,67 +2,63 @@
 
 import { prisma } from "@/lib/prisma";
 import { revalidatePath } from "next/cache";
-// 🚨 CRITICAL UPGRADE: We must import auth to secure the Server Action
 import { auth } from "@clerk/nextjs/server";
 
 export async function addResource(formData: FormData, imageUrl: string) {
   try {
-    // 🚨 CRITICAL UPGRADE: Server-Side Authorization Check
-    // This physically prevents unauthorized API requests from writing to Supabase.
+    // 1. Secure the Action: Fetch user credentials on the server
     const { userId, sessionClaims } = await auth();
 
-    // Check if they are logged in AND if their Clerk role is exactly "admin"
-    if (!userId || sessionClaims?.metadata?.role !== "admin") {
-      console.warn(`Unauthorized fleet creation attempt by User: ${userId || "Anonymous"}`);
+    // 2. Validate Permissions: Ensure the user is an 'admin'
+    // We cast sessionClaims as 'any' to easily access custom metadata
+    if (!userId || (sessionClaims?.metadata as any)?.role !== "admin") {
+      console.warn(`Unauthorized write attempt by: ${userId || "Anonymous"}`);
       return {
         success: false,
-        message: "Security Error: Only verified Administrators can modify the fleet.",
+        message: "Security Error: Admin privileges required to modify fleet.",
       };
     }
 
-    // 1. Grab the typed data from the Admin form
-    const name = formData.get("name") as string;
+    // 3. Extract and Sanitize Form Data
+    const name = (formData.get("name") as string)?.trim();
     const category = formData.get("category") as string;
-    const basePrice = formData.get("basePrice") as string;
+    const basePrice = (formData.get("basePrice") as string)?.trim();
     const status = formData.get("status") as string;
 
-    // 2. Basic Validation: Prevent empty submissions from polluting your database
+    // 4. Data Validation Guard
     if (!name || !category || !basePrice || !status) {
       return { 
         success: false, 
-        message: "Missing required fields. Please fill out the entire form." 
+        message: "Validation Error: All fields are mandatory." 
       };
     }
 
-    // 3. Save it directly to your Supabase Postgres Database
+    // 5. Database Operation (Supabase via Prisma)
     await prisma.resource.create({
       data: {
-        name: name.trim(),
+        name,
         category,
-        basePrice: basePrice.trim(),
+        basePrice,
         status,
-        imageUrl: imageUrl || null, // Fallback if the upload fails or is skipped
+        imageUrl: imageUrl || null,
       },
     });
 
-    [Image of Next.js Server Actions security architecture]
-
-    // 4. Instantly clear the Next.js cache so the new vehicle shows up immediately
-    revalidatePath("/dashboard"); // Updates the customer portal
-    revalidatePath("/"); // Updates the homepage FleetGrid
-    revalidatePath("/admin"); // 🚨 UPGRADE: Refreshes the admin panel itself
+    // 6. Cache Invalidation: Force Next.js to fetch fresh data on next visit
+    revalidatePath("/dashboard");
+    revalidatePath("/admin");
+    revalidatePath("/");
 
     return { 
       success: true, 
-      message: `${name} has been added to the fleet successfully!` 
+      message: `${name} synchronized and deployed successfully.` 
     };
 
   } catch (error) {
-    // 5. Safe Error Handling
     console.error("Supabase Database Error [addResource]:", error);
     return { 
       success: false, 
-      message: "A database connection error occurred. Please try again." 
+      message: "Sync Failure: Database connection timed out." 
     };
   }
 }

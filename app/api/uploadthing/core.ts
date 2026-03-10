@@ -1,16 +1,21 @@
 import { createUploadthing, type FileRouter } from "uploadthing/next";
+import { currentUser } from "@clerk/nextjs/server";
+import { UploadThingError } from "uploadthing/server";
 
 const f = createUploadthing();
 
 export const ourFileRouter = {
-  // 🚨 UPGRADE: Increased max file size to 10MB
-  vehicleImageUploader: f({ image: { maxFileSize: "10MB", maxFileCount: 1 } })
+  // ✅ Fixed for Production: 16MB is a valid TypeScript type
+  vehicleImageUploader: f({ image: { maxFileSize: "16MB", maxFileCount: 1 } })
     .middleware(async () => {
-      // 🚨 NUCLEAR DEV FIX: We have removed all Clerk auth checks for this test.
-      // We are forcing the middleware to just say "Yes, allow the upload."
-      console.log("UploadThing Middleware Pinged - Forcing Approval");
-      
-      return { userId: "test-user-123" };
+      const user = await currentUser();
+
+      // Restore security for the final build
+      if (!user) {
+        throw new UploadThingError("Unauthorized: You must be logged in.");
+      }
+
+      return { userId: user.id };
     })
     .onUploadComplete(async ({ metadata, file }) => {
       console.log("Upload complete! File URL:", file.url);

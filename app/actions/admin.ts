@@ -1,7 +1,8 @@
 "use server";
 
 import { clerkClient } from "@clerk/nextjs/server";
-import { checkRole } from "@/utils/roles";
+// 🚨 FIX: Added 'app/' to the absolute path alias
+import { checkRole } from "@/app/utils/roles"; 
 import { revalidatePath } from "next/cache";
 
 export async function setRole(userId: string, role: "admin" | "customer") {

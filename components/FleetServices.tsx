@@ -8,7 +8,7 @@ const FleetServices = async () => {
   let fetchError = false;
 
   // 🚨 CONFIG: Replace this with your actual business WhatsApp number
-  const WHATSAPP_NUMBER = "2348000000000"; // Example: Nigeria format
+  const WHATSAPP_NUMBER = "2348066605477"; // Example: Nigeria format
 
   try {
     fleetData = await prisma.resource.findMany({

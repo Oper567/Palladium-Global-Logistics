@@ -12,61 +12,68 @@ const HowItWorks = () => {
     {
       num: "02",
       title: "Live Pricing",
-      desc: "No more guessing. Check real-time prices for dispatch bikes, cargo vans, or heavy trucks directly from your dashboard.",
+      desc: "No more guessing. Check real-time prices for dispatch bikes, cargo vans, or heavy trucks directly from your secure dashboard.",
       icon: "M9 8h6m-5 0a3 3 0 110 6H9l3 3m-3-6h6m6 1a9 9 0 11-18 0 9 9 0 0118 0z"
     },
     {
       num: "03",
       title: "Instant Dispatch",
-      desc: "Select your resource and click 'Book Now'. Our system connects you to our 24/7 command center for immediate pickup.",
+      desc: "Select your resource and click 'Book Now'. Our system connects you to our 24/7 command center for immediate deployment.",
       icon: "M13 10V3L4 14h7v7l9-11h-7z"
     }
   ];
 
   return (
-    <section className="py-20 md:py-32 bg-white w-full overflow-hidden relative">
+    <section className="py-24 md:py-32 bg-white w-full overflow-hidden relative">
+      
       {/* Subtle background industrial accent */}
       <div 
-        className="absolute top-0 right-0 p-20 opacity-[0.03] pointer-events-none hidden lg:block select-none"
+        className="absolute top-0 right-0 p-20 opacity-[0.02] pointer-events-none hidden lg:block select-none transform translate-x-20 -translate-y-10"
         aria-hidden="true"
       >
-        <h2 className="text-[200px] font-black uppercase leading-none">Logistics</h2>
+        <span className="text-[250px] font-black uppercase leading-none tracking-tighter text-slate-900">Logistics</span>
       </div>
 
-      <div className="max-w-7xl mx-auto px-6 lg:px-8">
+      <div className="max-w-7xl mx-auto px-6 lg:px-8 relative z-10">
         
         {/* Header Section */}
-        <div className="flex flex-col items-center text-center mb-20">
-          <span className="px-4 py-1.5 bg-brand-light border border-brand-accent text-brand-primary text-[10px] font-black uppercase tracking-[0.3em] rounded-sm mb-6">
+        <div className="flex flex-col items-center text-center mb-24 max-w-3xl mx-auto">
+          <span className="px-4 py-1.5 bg-brand-light border border-brand-accent/30 text-brand-primary text-[10px] font-black uppercase tracking-[0.3em] rounded-sm mb-6 shadow-sm">
             The Palladium Way
           </span>
-          <h2 className="text-4xl md:text-6xl font-black text-brand-primary uppercase tracking-tighter mb-6">
-            How we <span className="text-brand-accent">Move</span> your goods
+          <h2 className="text-4xl md:text-5xl lg:text-6xl font-black text-brand-primary uppercase tracking-tighter mb-8 leading-[1.1]">
+            How we <span className="text-brand-accent relative inline-block">
+              Move
+              {/* Decorative underline */}
+              <span className="absolute -bottom-2 left-0 w-full h-1.5 bg-brand-accent opacity-50 skew-x-12"></span>
+            </span> your goods
           </h2>
-          <p className="max-w-2xl text-gray-500 font-medium text-lg leading-relaxed">
-            We’ve modernized logistics. Skip the long calls and paperwork with our streamlined digital dispatch process.
+          <p className="text-slate-500 font-medium text-base md:text-lg leading-relaxed">
+            We have modernized the Nigerian logistics sector. Skip the long calls and paperwork with our streamlined, secure digital dispatch process.
           </p>
         </div>
 
-        {/* 🚨 UPGRADE: Added a wrapper wrapper to hold the connecting line legally outside the <ol> */}
+        {/* Steps Container */}
         <div className="relative">
+          
           {/* Connecting Line (Desktop Only) */}
-          <div className="hidden md:block absolute top-8 left-0 w-full h-0.5 bg-slate-100 z-0" aria-hidden="true"></div>
+          <div className="hidden md:block absolute top-12 left-[16%] right-[16%] h-[2px] bg-gradient-to-r from-transparent via-slate-200 to-transparent z-0" aria-hidden="true"></div>
 
           {/* Steps Grid */}
-          <ol className="grid grid-cols-1 md:grid-cols-3 gap-12 lg:gap-16 relative z-10">
+          <ol className="grid grid-cols-1 md:grid-cols-3 gap-16 lg:gap-12 relative z-10" role="list" aria-label="3 steps to book a dispatch">
             {steps.map((step, idx) => (
-              /* 🚨 UPGRADE: Swapped key={idx} to key={step.num} for React rendering stability */
               <li key={step.num} className="relative z-10 flex flex-col items-center text-center group">
                 
                 {/* Number Circle */}
-                <div className="w-16 h-16 bg-white border-4 border-brand-light text-brand-primary font-black text-2xl flex items-center justify-center rounded-sm mb-8 shadow-xl group-hover:border-brand-accent group-hover:bg-brand-primary group-hover:text-white transition-all duration-500">
+                <div className="w-24 h-24 bg-white border-4 border-slate-50 text-brand-primary font-black text-3xl flex items-center justify-center rounded-sm mb-8 shadow-xl group-hover:border-brand-accent group-hover:bg-brand-primary group-hover:text-white transition-all duration-500 ease-out group-hover:-translate-y-2 relative">
                   {step.num}
+                  {/* Subtle glow effect on hover */}
+                  <div className="absolute inset-0 bg-brand-accent blur-xl opacity-0 group-hover:opacity-20 transition-opacity duration-500 rounded-sm -z-10"></div>
                 </div>
 
                 {/* Icon Container */}
-                <div className="mb-6 p-5 bg-slate-50 rounded-sm text-brand-primary group-hover:text-brand-accent group-hover:scale-110 transition-all duration-500 border border-slate-100 shadow-sm">
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
+                <div className="mb-6 p-4 bg-slate-50 rounded-full text-slate-400 group-hover:text-brand-accent group-hover:bg-brand-light transition-colors duration-500 border border-slate-100">
+                  <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
                     <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth="2" d={step.icon} />
                   </svg>
                 </div>
@@ -75,14 +82,14 @@ const HowItWorks = () => {
                 <h4 className="text-2xl font-black text-brand-primary mb-4 uppercase tracking-tight">
                   {step.title}
                 </h4>
-                <p className="text-gray-500 font-medium leading-relaxed text-sm md:text-base px-2">
+                <p className="text-slate-500 font-medium leading-relaxed text-sm md:text-base px-4 max-w-xs mx-auto">
                   {step.desc}
                 </p>
 
                 {/* Decorative Arrow (Mobile) */}
                 {idx !== steps.length - 1 && (
-                  <div className="md:hidden mt-10 text-brand-accent animate-bounce" aria-hidden="true">
-                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <div className="md:hidden mt-12 text-slate-300 animate-pulse" aria-hidden="true">
+                    <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 14l-7 7m0 0l-7-7m7 7V3" />
                     </svg>
                   </div>
@@ -93,14 +100,14 @@ const HowItWorks = () => {
         </div>
 
         {/* Call to Action at Bottom of Steps */}
-        <div className="mt-20 flex justify-center">
-          <div className="inline-flex flex-col md:flex-row items-center gap-6 p-2 bg-slate-50 rounded-sm border border-slate-200">
-            <p className="px-6 text-xs font-black text-brand-primary uppercase tracking-widest text-center">
-              Ready to see the fleet?
+        <div className="mt-24 flex justify-center w-full">
+          <div className="inline-flex flex-col sm:flex-row items-center justify-between gap-6 p-2 bg-slate-50 rounded-sm border border-slate-200 shadow-sm w-full max-w-2xl">
+            <p className="px-6 text-[11px] font-black text-slate-500 uppercase tracking-widest text-center sm:text-left">
+              Ready to see the <span className="text-brand-primary">Palladium Fleet?</span>
             </p>
             <Link 
               href="/#fleet"
-              className="px-8 py-3 bg-brand-primary text-white font-bold uppercase text-[10px] tracking-widest hover:bg-brand-accent hover:text-brand-primary transition-all rounded-sm shadow-md focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2"
+              className="w-full sm:w-auto px-10 py-4 bg-brand-primary text-white font-black uppercase text-[10px] tracking-[0.2em] hover:bg-brand-accent hover:text-brand-primary transition-all duration-300 rounded-sm shadow-md focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2 text-center"
             >
               Check Live Availability
             </Link>

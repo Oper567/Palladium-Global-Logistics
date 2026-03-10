@@ -9,7 +9,7 @@ const Header = () => {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   
-  // Hydration safety: Prevents "Hydration Mismatch" errors
+  // Hydration safety: Prevents "Hydration Mismatch" errors between Clerk and Next.js
   const [mounted, setMounted] = useState(false);
 
   const pathname = usePathname();
@@ -33,12 +33,10 @@ const Header = () => {
 
   const closeMenu = () => setIsMobileMenuOpen(false);
 
-  const isPortal = pathname.includes("/dashboard") || pathname.includes("/admin");
+  const isPortal = pathname?.startsWith("/dashboard") || pathname?.startsWith("/admin");
 
-  // 🚨 CRITICAL UPGRADE: Dynamic Admin Check
-  // We now check the Clerk 'publicMetadata' instead of a hardcoded email.
-  // This allows you to promote any user to Admin directly from the Clerk Dashboard.
-  const isAdmin = isLoaded && user?.publicMetadata?.role === "admin";
+  // Dynamic Admin Check via Clerk publicMetadata
+  const isAdmin = isLoaded && (user?.publicMetadata as any)?.role === "admin";
 
   return (
     <header
@@ -52,11 +50,12 @@ const Header = () => {
     `}
     >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        
         {/* Logo Section */}
         <Link
           href="/"
           onClick={closeMenu}
-          className="flex items-center gap-3 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm"
+          className="flex items-center gap-3 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-4 rounded-sm"
           aria-label="Palladium Global Home"
         >
           <div className="flex flex-col">
@@ -84,12 +83,12 @@ const Header = () => {
           {mounted && (
             !isSignedIn ? (
               <div className="flex items-center gap-4">
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
                   <button className="hover:text-brand-accent transition-all text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm px-2 py-1">
                     Client Login
                   </button>
                 </SignInButton>
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
                   <button className="px-6 py-2 bg-brand-primary text-white hover:bg-brand-accent hover:text-brand-primary transition-all duration-300 rounded-sm shadow-lg border border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-1">
                     Register
                   </button>
@@ -99,19 +98,21 @@ const Header = () => {
               <div className="flex items-center gap-8">
                 <Link
                   href="/dashboard"
+                  aria-current={pathname?.startsWith("/dashboard") ? "page" : undefined}
                   className={`${
-                    pathname === "/dashboard" ? "text-brand-accent" : "text-slate-400"
+                    pathname?.startsWith("/dashboard") ? "text-brand-accent" : "text-slate-400"
                   } hover:text-brand-primary transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm px-2 py-1`}
                 >
                   Portal
                 </Link>
 
-                {/* 🚨 This will now automatically hide/show based on the user's Clerk Dashboard role */}
+                {/* Secure Admin Link */}
                 {isAdmin && (
                   <Link
                     href="/admin"
+                    aria-current={pathname?.startsWith("/admin") ? "page" : undefined}
                     className={`${
-                      pathname.includes("/admin") ? "text-brand-accent" : "text-slate-400"
+                      pathname?.startsWith("/admin") ? "text-brand-accent" : "text-slate-400"
                     } hover:text-brand-primary transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm px-2 py-1`}
                   >
                     Admin
@@ -123,7 +124,11 @@ const Header = () => {
                     appearance={{
                       elements: {
                         userButtonAvatarBox: "w-8 h-8 rounded-sm hover:scale-105 transition-transform",
+                        userButtonPopoverCard: "rounded-sm shadow-2xl border border-slate-100",
                       },
+                      variables: {
+                        colorPrimary: "#0f172a", // Matches your brand-primary
+                      }
                     }}
                   />
                 </div>
@@ -134,20 +139,20 @@ const Header = () => {
 
         {/* Mobile Toggle & Auth */}
         <div className="lg:hidden flex items-center gap-4">
-          {mounted && isSignedIn && <UserButton />}
+          {mounted && isSignedIn && (
+             <UserButton 
+                appearance={{
+                  elements: { userButtonAvatarBox: "w-8 h-8 rounded-sm" }
+                }}
+             />
+          )}
           <button
             className="p-2 text-brand-primary active:scale-90 transition-transform bg-slate-50 rounded-sm border border-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-accent"
             onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
             aria-label={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
             aria-expanded={isMobileMenuOpen}
           >
-            <svg
-              className="w-6 h-6"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              aria-hidden="true"
-            >
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24" aria-hidden="true">
               {isMobileMenuOpen ? (
                 <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
               ) : (
@@ -177,7 +182,7 @@ const Header = () => {
           {mounted && (
             !isSignedIn ? (
               <>
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
                   <button
                     onClick={closeMenu}
                     className="text-left text-sm font-black text-brand-primary uppercase tracking-widest border-b border-slate-50 pb-4 focus:outline-none focus:text-brand-accent"
@@ -185,10 +190,10 @@ const Header = () => {
                     Client Sign In
                   </button>
                 </SignInButton>
-                <SignInButton mode="modal">
+                <SignInButton mode="modal" fallbackRedirectUrl="/dashboard">
                   <button
                     onClick={closeMenu}
-                    className="w-full py-4 bg-brand-primary text-white text-sm font-black uppercase tracking-widest rounded-sm shadow-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+                    className="w-full py-4 bg-brand-primary text-white text-sm font-black uppercase tracking-widest rounded-sm shadow-md focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-2"
                   >
                     Register Account
                   </button>
@@ -199,7 +204,9 @@ const Header = () => {
                 <Link
                   href="/dashboard"
                   onClick={closeMenu}
-                  className="text-sm font-black text-brand-accent uppercase tracking-widest border-b border-slate-50 pb-4 focus:outline-none focus:text-brand-primary"
+                  className={`text-sm font-black uppercase tracking-widest border-b border-slate-50 pb-4 focus:outline-none focus:text-brand-primary ${
+                    pathname?.startsWith("/dashboard") ? "text-brand-accent" : "text-brand-primary"
+                  }`}
                 >
                   Customer Portal
                 </Link>
@@ -208,7 +215,9 @@ const Header = () => {
                   <Link
                     href="/admin"
                     onClick={closeMenu}
-                    className="text-sm font-black text-brand-primary uppercase tracking-widest focus:outline-none focus:text-brand-accent"
+                    className={`text-sm font-black uppercase tracking-widest focus:outline-none focus:text-brand-accent ${
+                      pathname?.startsWith("/admin") ? "text-brand-accent" : "text-brand-primary"
+                    }`}
                   >
                     Admin Panel
                   </Link>

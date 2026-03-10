@@ -1,0 +1,225 @@
+"use client";
+
+import React, { useState, useEffect } from "react";
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { SignInButton, UserButton, useUser, useAuth } from "@clerk/nextjs";
+
+const Header = () => {
+  const [isScrolled, setIsScrolled] = useState(false);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  
+  // Hydration safety: Prevents "Hydration Mismatch" errors
+  const [mounted, setMounted] = useState(false);
+
+  const pathname = usePathname();
+
+  // Accessing Clerk user state
+  const { user, isLoaded } = useUser();
+  const { isSignedIn } = useAuth();
+
+  useEffect(() => {
+    setMounted(true);
+
+    const handleScroll = () => {
+      requestAnimationFrame(() => {
+        setIsScrolled(window.scrollY > 20);
+      });
+    };
+    
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const closeMenu = () => setIsMobileMenuOpen(false);
+
+  const isPortal = pathname.includes("/dashboard") || pathname.includes("/admin");
+
+  // 🚨 CRITICAL UPGRADE: Dynamic Admin Check
+  // We now check the Clerk 'publicMetadata' instead of a hardcoded email.
+  // This allows you to promote any user to Admin directly from the Clerk Dashboard.
+  const isAdmin = isLoaded && user?.publicMetadata?.role === "admin";
+
+  return (
+    <header
+      className={`
+      fixed left-0 right-0 z-[100] transition-all duration-500 ease-in-out
+      ${
+        isScrolled
+          ? "top-2 md:top-4 w-[95%] max-w-7xl mx-auto rounded-sm shadow-2xl border border-slate-200/60 bg-white/95 backdrop-blur-xl"
+          : "top-0 w-full bg-white border-b border-slate-100"
+      }
+    `}
+    >
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4 flex justify-between items-center">
+        {/* Logo Section */}
+        <Link
+          href="/"
+          onClick={closeMenu}
+          className="flex items-center gap-3 group cursor-pointer focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm"
+          aria-label="Palladium Global Home"
+        >
+          <div className="flex flex-col">
+            <h1 className="text-lg md:text-xl font-black text-brand-primary uppercase leading-none tracking-tighter group-hover:text-brand-accent transition-colors duration-300">
+              Palladium Global
+            </h1>
+            <h2 className="text-[9px] md:text-[10px] font-bold text-slate-500 tracking-[0.25em] uppercase mt-1">
+              {isPortal ? "Command Center" : "Logistics Portal"}
+            </h2>
+          </div>
+        </Link>
+
+        {/* Desktop Links & Auth */}
+        <nav className="hidden lg:flex items-center gap-8 font-extrabold text-[10px] md:text-xs text-brand-primary uppercase tracking-[0.2em]">
+          <Link
+            href="/#fleet"
+            className={`hover:text-brand-accent transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm px-2 py-1 ${
+              pathname === "/" ? "text-brand-primary" : "text-slate-400"
+            }`}
+          >
+            Fleet
+          </Link>
+
+          {/* Hydration-safe Auth UI */}
+          {mounted && (
+            !isSignedIn ? (
+              <div className="flex items-center gap-4">
+                <SignInButton mode="modal">
+                  <button className="hover:text-brand-accent transition-all text-slate-400 focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm px-2 py-1">
+                    Client Login
+                  </button>
+                </SignInButton>
+                <SignInButton mode="modal">
+                  <button className="px-6 py-2 bg-brand-primary text-white hover:bg-brand-accent hover:text-brand-primary transition-all duration-300 rounded-sm shadow-lg border border-brand-primary focus:outline-none focus:ring-2 focus:ring-brand-accent focus:ring-offset-1">
+                    Register
+                  </button>
+                </SignInButton>
+              </div>
+            ) : (
+              <div className="flex items-center gap-8">
+                <Link
+                  href="/dashboard"
+                  className={`${
+                    pathname === "/dashboard" ? "text-brand-accent" : "text-slate-400"
+                  } hover:text-brand-primary transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm px-2 py-1`}
+                >
+                  Portal
+                </Link>
+
+                {/* 🚨 This will now automatically hide/show based on the user's Clerk Dashboard role */}
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    className={`${
+                      pathname.includes("/admin") ? "text-brand-accent" : "text-slate-400"
+                    } hover:text-brand-primary transition-all focus:outline-none focus:ring-2 focus:ring-brand-accent rounded-sm px-2 py-1`}
+                  >
+                    Admin
+                  </Link>
+                )}
+
+                <div className="pl-4 border-l border-slate-200 flex items-center">
+                  <UserButton
+                    appearance={{
+                      elements: {
+                        userButtonAvatarBox: "w-8 h-8 rounded-sm hover:scale-105 transition-transform",
+                      },
+                    }}
+                  />
+                </div>
+              </div>
+            )
+          )}
+        </nav>
+
+        {/* Mobile Toggle & Auth */}
+        <div className="lg:hidden flex items-center gap-4">
+          {mounted && isSignedIn && <UserButton />}
+          <button
+            className="p-2 text-brand-primary active:scale-90 transition-transform bg-slate-50 rounded-sm border border-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-accent"
+            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+            aria-label={isMobileMenuOpen ? "Close Menu" : "Open Menu"}
+            aria-expanded={isMobileMenuOpen}
+          >
+            <svg
+              className="w-6 h-6"
+              fill="none"
+              stroke="currentColor"
+              viewBox="0 0 24 24"
+              aria-hidden="true"
+            >
+              {isMobileMenuOpen ? (
+                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              ) : (
+                <path strokeLinecap="square" strokeLinejoin="miter" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+              )}
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      {/* Mobile Menu Dropdown */}
+      <div
+        className={`
+        lg:hidden overflow-hidden transition-all duration-500 ease-in-out bg-white/95 backdrop-blur-md
+        ${isMobileMenuOpen ? "max-h-screen opacity-100 border-t border-slate-100" : "max-h-0 opacity-0"}
+      `}
+      >
+        <div className="px-6 py-10 flex flex-col gap-8 shadow-inner">
+          <Link
+            href="/#fleet"
+            onClick={closeMenu}
+            className="text-sm font-black text-brand-primary uppercase tracking-widest border-b border-slate-50 pb-4 focus:outline-none focus:text-brand-accent"
+          >
+            Our Fleet
+          </Link>
+
+          {mounted && (
+            !isSignedIn ? (
+              <>
+                <SignInButton mode="modal">
+                  <button
+                    onClick={closeMenu}
+                    className="text-left text-sm font-black text-brand-primary uppercase tracking-widest border-b border-slate-50 pb-4 focus:outline-none focus:text-brand-accent"
+                  >
+                    Client Sign In
+                  </button>
+                </SignInButton>
+                <SignInButton mode="modal">
+                  <button
+                    onClick={closeMenu}
+                    className="w-full py-4 bg-brand-primary text-white text-sm font-black uppercase tracking-widest rounded-sm shadow-md focus:outline-none focus:ring-2 focus:ring-brand-primary focus:ring-offset-2"
+                  >
+                    Register Account
+                  </button>
+                </SignInButton>
+              </>
+            ) : (
+              <>
+                <Link
+                  href="/dashboard"
+                  onClick={closeMenu}
+                  className="text-sm font-black text-brand-accent uppercase tracking-widest border-b border-slate-50 pb-4 focus:outline-none focus:text-brand-primary"
+                >
+                  Customer Portal
+                </Link>
+
+                {isAdmin && (
+                  <Link
+                    href="/admin"
+                    onClick={closeMenu}
+                    className="text-sm font-black text-brand-primary uppercase tracking-widest focus:outline-none focus:text-brand-accent"
+                  >
+                    Admin Panel
+                  </Link>
+                )}
+              </>
+            )
+          )}
+        </div>
+      </div>
+    </header>
+  );
+};
+
+export default Header;

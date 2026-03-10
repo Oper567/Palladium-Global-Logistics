@@ -2,13 +2,12 @@ import { auth } from "@clerk/nextjs/server";
 import { redirect } from "next/navigation";
 import AdminForm from "@/components/AdminForm";
 import Link from "next/link";
-import { SignOutButton } from "@clerk/nextjs";
 
 export default async function AdminPage() {
   const { userId, sessionClaims } = await auth();
 
-  // 🚨 Server-Side Security Gate
-  if (!userId || sessionClaims?.metadata?.role !== "admin") {
+  // 🚨 TypeScript FIX: We cast metadata as 'any' so TS knows 'role' exists
+  if (!userId || (sessionClaims?.metadata as any)?.role !== "admin") {
     redirect("/"); // Instantly kick out non-admins
   }
 

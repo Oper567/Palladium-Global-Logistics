@@ -1,7 +1,8 @@
 "use client";
 
 import { useState } from "react";
-import { setRole } from "@/actions/admin";
+// 🚨 FIX: Added 'app/' to match the exact absolute path of your actions folder
+import { setRole } from "@/app/actions/admin"; 
 import { useSession } from "@clerk/nextjs";
 
 interface UserRecord {

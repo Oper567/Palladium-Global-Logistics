@@ -8,7 +8,8 @@ export default clerkMiddleware(async (auth, req) => {
     const { sessionClaims } = await auth();
     
     // If the metadata role isn't 'admin', block the request
-    if (sessionClaims?.metadata?.role !== "admin") {
+    // 🚨 TypeScript FIX: Cast metadata as 'any' so TS knows 'role' exists
+    if ((sessionClaims?.metadata as any)?.role !== "admin") {
       const url = new URL("/", req.url);
       return NextResponse.redirect(url);
     }
